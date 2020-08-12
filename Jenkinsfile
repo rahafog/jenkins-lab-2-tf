@@ -20,16 +20,7 @@ pipeline {
               sh 'make init'
           }
       }
-      stage("workspace") {
-          steps {
-              sh """
-terraform workspace select Rahaf-tf
-if [[ \$? -ne 0 ]]; then
-  terraform workspace new Rahaf-tf
-fi
-"""
-          }
-      }
+ 
       stage("plan") {
           steps {
               sh 'make plan'
