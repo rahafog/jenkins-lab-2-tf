@@ -55,8 +55,8 @@ resource "aws_vpc" "lab" {
   enable_dns_hostnames = true
 }
 
-resource "aws_route53_zone" "bryan_dobc" {
-  name = "bryan.dobc"
+resource "aws_route53_zone" "rahaf_dobc" {
+  name = "rahaf.dobc"
   tags = module.tags_network.tags
 
   vpc {
@@ -172,6 +172,22 @@ resource "aws_instance" "webserver" {
   associate_public_ip_address = true
   tags                        = module.tags_webserver.tags
   depends_on                  = [aws_instance.api]
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo \"${aws_instance.api.0.public_ip}\" > /home/ubuntu/api/index.html"
+    ]
+
+    connection {
+      type                = "ssh"
+      user                = "ubuntu"
+      host                = self.private_ip
+      private_key         = file("./ssh/id_rsa")
+      bastion_host        = aws_instance.bastion.public_ip
+      bastion_private_key = file("./ssh/id_rsa")
+      bastion_user        = "ubuntu"
+    }
+  }
 }
 
 resource "aws_instance" "api" {
@@ -184,7 +200,6 @@ resource "aws_instance" "api" {
   associate_public_ip_address = true
   tags                        = module.tags_webserver.tags
 }
-
 
 resource "aws_instance" "bastion" {
   ami                    = "ami-02c7c728a7874ae7a"
